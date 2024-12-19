@@ -1,0 +1,13 @@
+services:
+  system_monitor:
+    build: .
+    volumes:
+      - /proc:/host_proc:ro
+      - /sys:/host_sys:ro
+    environment:
+      - PROC_PATH=/host_proc
+      - SYS_PATH=/host_sys
+    cap_add:
+      - SYS_ADMIN
+    privileged: true
+    network_mode: host
