@@ -52,4 +52,4 @@ def send_data_to_websocket(ws_url, interval=5):
 
 if __name__ == "__main__":
     WS_URL = "ws://localhost:6672/ws"
-    send_data_to_websocket(WS_URL, interval=15)
+    send_data_to_websocket(WS_URL, interval=10)
