@@ -26,7 +26,7 @@ def format_system_info():
     }
 
 def send_data_to_websocket(ws):
-    """Send formatted system stats to the WebSocket server at regular intervals."""
+    """Send formatted system stats to the WebSocket server."""
     try:
         system_info = format_system_info()
         
@@ -53,10 +53,10 @@ if __name__ == "__main__":
     try:
         while True:
             result = ws.recv()
-            print(f"Received: {result}")
             data = json.loads(result)
-            
+
             if data.get("type") == "request_system_info":
+                print("Received request for system info")
                 send_data_to_websocket(ws)
                 
     except Exception as e:
