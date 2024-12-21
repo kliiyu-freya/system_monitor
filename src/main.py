@@ -12,7 +12,7 @@ psutil.PROCFS_PATH = PROC_PATH
 def format_system_info():
     """Fetch and format system stats from the host system."""
     uptime = time.time() - psutil.boot_time()  # System uptime in seconds
-
+    
     return {
         "type": "system_info",
         "data": {
@@ -25,31 +25,42 @@ def format_system_info():
         }
     }
 
-def send_data_to_websocket(ws_url, interval=5):
+def send_data_to_websocket(ws):
     """Send formatted system stats to the WebSocket server at regular intervals."""
-    ws = None  # Initialize the ws variable
     try:
-        ws = create_connection(ws_url)
-        print(f"Connected to WebSocket server at {ws_url}")
-
-        while True:
-            # Fetch and format host system stats
-            system_info = format_system_info()
-
-            # Convert to JSON and send via WebSocket
-            message = json.dumps(system_info)
-            ws.send(message)
-            print(f"Sent: {message}")
-
-            # Wait for the next interval
-            time.sleep(interval)
+        system_info = format_system_info()
+        
+        message = json.dumps(system_info)
+        ws.send(message)
+        print(f"Sent: {message}")
+            
     except Exception as e:
         print(f"Error: {e}")
-    finally:
-        if ws:
-            ws.close()
-            print("WebSocket connection closed")
 
 if __name__ == "__main__":
     WS_URL = "ws://localhost:6672/ws"
-    send_data_to_websocket(WS_URL, interval=15)
+    ws = None
+    
+    while ws is None:
+        try:
+            ws = create_connection(WS_URL)
+            print(f"Connected to WebSocket server at {WS_URL}")
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            time.sleep(5)
+
+    try:
+        while True:
+            result = ws.recv()
+            print(f"Received: {result}")
+            data = json.loads(result)
+            
+            if data.get("type") == "request_system_info":
+                send_data_to_websocket(ws)
+                
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        ws.close()
+    
